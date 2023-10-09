@@ -1,4 +1,4 @@
-wget https://github.com/Upsidedly/sico/raw/main/releases/sico-latest.gz
+wget -q https://github.com/Upsidedly/sico/raw/main/releases/sico-latest.gz
 gunzip sico-latest.gz
 
 SICO_DIR="$HOME/.sico"
