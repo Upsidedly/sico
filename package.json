@@ -1,0 +1,26 @@
+{
+  "name": "sico",
+  "module": "src/index.ts",
+  "version": "0.0.0",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "sico": "bun ./src/sico.ts",
+    "compile": "cat compile.sh | bash"
+  },
+  "dependencies": {
+    "@favware/colorette-spinner": "^1.0.1",
+    "@types/change-case": "^2.3.1",
+    "@types/commander": "^2.12.2",
+    "@upsided/prompts": "^1.0.1",
+    "change-case": "^5.0.2",
+    "colorette": "^2.0.20",
+    "commander": "^11.0.0",
+    "detect-package-manager": "^3.0.1"
+  }
+}
