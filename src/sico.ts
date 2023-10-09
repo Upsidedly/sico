@@ -5,6 +5,7 @@ import { Spinner } from "@favware/colorette-spinner";
 import { bold } from "colorette";
 import { kebabCase, pascalCase } from "change-case";
 import p from '../package.json'
+import { ExecException, exec } from "child_process";
 
 const which: "bun" | "npm" | "pnpm" | "yarn" = await detect();
 if (which !== "bun") throw new Error("Package manager is not Bun!");
@@ -23,6 +24,26 @@ program
   .name("sico")
   .description("CLI helper for the Sicomoro discord.js framework for Bun.")
   .version(p.version);
+
+program
+  .command('upgrade')
+  .alias('update')
+  .description('Update the sico CLI to the latest version!')
+  .action(async () => {
+    const spinner = new Spinner()
+    spinner.start({ text: 'Installing...' })
+    const [error, stdout, sterr] = await new Promise((resolve, reject) => {
+      exec('curl -fsSL https://raw.githubusercontent.com/Upsidedly/sico/main/install.sh | bash', (error, stdout, stderr) => {
+        resolve([error, stdout, stderr])
+      })
+    }) as [ExecException | null, string, string]
+    if (error) {
+      console.log(error)
+    }
+
+    spinner.success({ text: stdout.match(/previous.*/)![0].replace('previous', 'Current').replace('found', 'is') + '.' })
+    spinner.success({ text: stdout.match(/sico version.*/)![0].replace('sico', 'Sico') })
+  })
 
 program
   .command('create')
