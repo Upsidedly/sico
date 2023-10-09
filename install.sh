@@ -14,8 +14,8 @@ if [ -f "$BIN_DIR/sico" ]; then
   rm "$BIN_DIR/sico"
 fi
 
-VERSION=$(sico-latest -V)
 mv sico-latest "$BIN_DIR/sico"
-echo "sico version $VERSION installed successfully!"
+chmod 755 $BIN_DIR/sico
+echo "sico version $($BIN_DIR/sico -V) installed successfully!"
 
 echo -e "put this in your ~/.bashrc:\n\nexport PATH=$BIN_DIR:\$PATH"
