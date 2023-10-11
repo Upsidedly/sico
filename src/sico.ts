@@ -3,8 +3,9 @@ import prompts from "@upsided/prompts";
 import { Spinner } from "@favware/colorette-spinner";
 import { bold } from "colorette";
 import { kebabCase, pascalCase } from "change-case";
-import p from '../package.json'
+import p from "../package.json";
 import { ExecException, exec } from "child_process";
+import semverCmp from "semver-compare";
 
 const program = new Command();
 
@@ -14,7 +15,7 @@ const qc = (title: string, type?: string) => ({
   description: type ? `(${type})` : undefined,
 });
 
-type QuestionsResponse = { [key: string]: string }
+type QuestionsResponse = { [key: string]: string };
 
 program
   .name("sico")
@@ -22,37 +23,75 @@ program
   .version(p.version);
 
 program
-  .command('upgrade')
-  .alias('update')
-  .description('Update the sico CLI to the latest version!')
+  .command("upgrade")
+  .alias("update")
+  .description("Update the sico CLI to the latest version!")
   .action(async () => {
-    const spinner = new Spinner()
-    spinner.start({ text: 'Installing...' })
-    const [error, stdout, sterr] = await new Promise((resolve, reject) => {
-      exec('curl -fsSL https://raw.githubusercontent.com/Upsidedly/sico/main/install.sh | bash', (error, stdout, stderr) => {
-        resolve([error, stdout, stderr])
-      })
-    }) as [ExecException | null, string, string]
-    if (error) {
-      console.log(error)
+    const spinner = new Spinner();
+    spinner.start({ text: "Checking latest version..." });
+    const res = await fetch(
+      "https://raw.githubusercontent.com/Upsidedly/sico/main/package.json"
+    );
+    const version: string = (JSON.parse(await res.text())).version;
+
+    const comparison = semverCmp(version, p.version);
+    spinner.success();
+    let message: string;
+    switch (comparison) {
+      case 0: message = "You are on the latest version! Install anyway?"; break;
+      case 1: message = `Version ${bold(
+        version
+      )} avaliable! Proceed with installation?`; break;
+      default: message = `You are on a higher version than the latest?? Install anyway?`
     }
 
-    spinner.success({ text: stdout.match(/previous.*/)![0].replace('previous', 'Current').replace('found', 'is') + '.' })
-    spinner.success({ text: stdout.match(/sico version.*/)![0].replace('sico', 'Sico') })
-  })
+    if (!(
+      await prompts({
+        type: "confirm",
+        name: "still",
+        message,
+      })
+    ).still) return;
+
+    spinner.start({ text: "Installing..." });
+    const [error, stdout] = (await new Promise((resolve) => {
+      exec(
+        "curl -fsSL https://raw.githubusercontent.com/Upsidedly/sico/main/install.sh | bash",
+        (error, stdout, stderr) => {
+          resolve([error, stdout, stderr]);
+        }
+      );
+    })) as [ExecException | null, string, string];
+    if (error) {
+      console.log(error);
+    }
+
+    spinner.success({
+      text:
+        stdout
+          .match(/previous.*/)![0]
+          .replace("previous", "Current")
+          .replace("found", "is") + ".",
+    });
+    spinner.success({
+      text: stdout.match(/sico version.*/)![0].replace("sico", "Sico"),
+    });
+  });
 
 program
-  .command('create')
-  .alias('new')
-  .description('Scaffold a new Sicomoro project')
-  .option('--name [name]', 'Name of the project')
+  .command("create")
+  .alias("new")
+  .description("Scaffold a new Sicomoro project")
+  .option("--name [name]", "Name of the project")
   .action(async (options: { name?: string }) => {
-    options.name ??= (await prompts({
-      type: options.name ? null : 'text',
-      name: 'name',
-      message: 'What is the name of the project?'
-    })).name
-  })
+    options.name ??= (
+      await prompts({
+        type: options.name ? null : "text",
+        name: "name",
+        message: "What is the name of the project?",
+      })
+    ).name;
+  });
 
 program
   .command("generate")
@@ -81,11 +120,11 @@ program
       }
 
       case "listener": {
-        const { event, name, filename, directory } = await prompts([
+        const { event, name, filename, directory } = (await prompts([
           {
-            type: 'autocomplete',
-            name: 'event',
-            message: 'The event to listen to',
+            type: "autocomplete",
+            name: "event",
+            message: "The event to listen to",
             choices: [
               qc("applicationCommandPermissionsUpdate"),
               qc("autoModerationActionExecution"),
@@ -160,47 +199,47 @@ program
               qc("guildScheduledEventDelete"),
               qc("guildScheduledEventUserAdd"),
               qc("guildScheduledEventUserRemove"),
-            ]
+            ],
           },
           {
-            type: 'text',
-            name: 'name',
-            message: 'The name of the listener',
-            initial: (prev) => pascalCase(prev + 'Listener')
+            type: "text",
+            name: "name",
+            message: "The name of the listener",
+            initial: (prev) => pascalCase(prev + "Listener"),
           },
           {
-            type: 'text',
-            name: 'filename',
-            message: 'The filename of the listener',
-            initial: (prev) => kebabCase(prev.replace('Listener', ''))
+            type: "text",
+            name: "filename",
+            message: "The filename of the listener",
+            initial: (prev) => kebabCase(prev.replace("Listener", "")),
           },
           {
-            type: 'text',
-            name: 'directory',
-            message: 'The directory of the listener',
-            initial: 'listeners/'
-          }
-        ]) as QuestionsResponse
+            type: "text",
+            name: "directory",
+            message: "The directory of the listener",
+            initial: "listeners/",
+          },
+        ])) as QuestionsResponse;
         spinner.start();
         spinner.update({ text: "Formulating content" });
         // Do string interpolation here
-        spinner.success({ text: 'Formulated content' });
+        spinner.success({ text: "Formulated content" });
 
-        spinner.start()
-        spinner.update({ text: 'Locating filepath' });
+        spinner.start();
+        spinner.update({ text: "Locating filepath" });
         // Path joins here
-        spinner.success({ text: 'Located filepath'})
+        spinner.success({ text: "Located filepath" });
 
-        spinner.start()
-        spinner.update({ text: 'Writing to file' })
+        spinner.start();
+        spinner.update({ text: "Writing to file" });
         // Bun.write( filepath ,  content )
-        spinner.success({ text: 'Written to successfully!' })
-        spinner.success({ text: `Listener "${name}" created successfully!`})
+        spinner.success({ text: "Written to successfully!" });
+        spinner.success({ text: `Listener "${name}" created successfully!` });
         break;
       }
 
       case "prerequisite": {
-        const { name, filename, directory } = await prompts([
+        const { name, filename, directory } = (await prompts([
           {
             type: "text",
             name: "name",
@@ -213,12 +252,12 @@ program
             initial: (prev) => kebabCase(prev),
           },
           {
-            type: 'text',
-            name: 'directory',
-            message: 'Prerequisite directory',
-            initial: 'prereqs/'
-          }
-        ]) as QuestionsResponse
+            type: "text",
+            name: "directory",
+            message: "Prerequisite directory",
+            initial: "prereqs/",
+          },
+        ])) as QuestionsResponse;
         spinner.update({ text: "Prerequisite selected" });
         spinner.success({ text: "y" });
         spinner.start({ text: "doing sum else" });

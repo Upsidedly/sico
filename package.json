@@ -1,7 +1,7 @@
 {
   "name": "sico",
   "module": "src/index.ts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "devDependencies": {
     "bun-types": "latest"
@@ -17,9 +17,11 @@
     "@favware/colorette-spinner": "^1.0.1",
     "@types/change-case": "^2.3.1",
     "@types/commander": "^2.12.2",
+    "@types/semver-compare": "^1.0.1",
     "@upsided/prompts": "^1.0.1",
     "change-case": "^5.0.2",
     "colorette": "^2.0.20",
-    "commander": "^11.0.0"
+    "commander": "^11.0.0",
+    "semver-compare": "^1.0.0"
   }
 }
