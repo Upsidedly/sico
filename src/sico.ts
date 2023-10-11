@@ -1,4 +1,3 @@
-const { detect } = require("detect-package-manager");
 import { Command } from "commander";
 import prompts from "@upsided/prompts";
 import { Spinner } from "@favware/colorette-spinner";
@@ -6,9 +5,6 @@ import { bold } from "colorette";
 import { kebabCase, pascalCase } from "change-case";
 import p from '../package.json'
 import { ExecException, exec } from "child_process";
-
-const which: "bun" | "npm" | "pnpm" | "yarn" = await detect();
-if (which !== "bun") throw new Error("Package manager is not Bun!");
 
 const program = new Command();
 
